@@ -1,0 +1,61 @@
+{% block content %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Log In - Auto Sham</title>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <style>
+        body { 
+            background: linear-gradient(rgba(28, 30, 50, .9), rgba(28, 30, 50, .9)), url("{% static 'img/bg-banner.jpg'%}");
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        .card-register 
+        { 
+            max-width: 500px;
+            margin-top: 80px;
+            margin-bottom: 200px;
+            margin-left: auto;
+            margin-right: auto; 
+            padding: 30px; 
+            border-radius: 20px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2); 
+            background: white; }
+        .card-register h3 { 
+            margin-bottom: 20px; 
+        }
+    </style>
+</head>
+<body>
+<div class="card card-register">
+    <h3 class="text-center">Log in To Your Account</h3>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="mb-3">
+            {{ form.username.label_tag }}
+            {{ form.username }}
+            {{ form.username.errors }}
+        </div>
+        <div class="mb-3">
+            {{ form.email.label_tag }}
+            {{ form.email }}
+            {{ form.email.errors }}
+        </div>
+        <div class="mb-3">
+            {{ form.password.label_tag }}
+            {{ form.password }}
+            {{ form.password.errors }}
+        </div>
+        <button type="submit" class="btn btn-primary w-100" style="border-radius: 20px;">Log in</button>
+    </form>
+    <p class="text-center mt-3">
+          Don't have an account?
+        <a href="{% url 'frontend:sign_in'%}">Register here</a>
+    </p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+{% endblock%}

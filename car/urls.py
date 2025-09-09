@@ -16,6 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path ,include
+from .settings import *
+from django.contrib import admin
+from django.urls import path , include
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -23,5 +29,12 @@ urlpatterns = [
     path('api/',include('payment.urls')),
     path('api/',include('product.urls')),
     path('api/',include('purchase.urls')),
-    path('api/',include('user.urls'))
+    path('api/',include('user.urls')),
+    path('api/',include('advertisment.urls')),
 ]
+
+urlpatterns += static(settings.MEDIA_URL , document_root = settings.MEDIA_ROOT)
+urlpatterns += staticfiles_urlpatterns()
+
+if not settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

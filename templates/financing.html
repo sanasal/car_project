@@ -33,6 +33,35 @@
 
     <!-- Template Stylesheet -->
     <link href="{% static 'css/style.css'%}" rel="stylesheet">
+
+    <style>
+        .form-select {
+            display: block;
+            width: 100%;
+            padding: 0.375rem 2.25rem 0.375rem 0.75rem;
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #212529;
+            background-color: #fff;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 16px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
+            transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+        }
+
+        .form-select:focus {
+            border-color: #86b7fe;
+            outline: 0;
+            box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25);
+        }
+    </style>
 </head>
 
 <body>
@@ -161,41 +190,42 @@
         <div class="col-lg-6">
             <div class="bg-white p-4 p-md-5 rounded-4 shadow-sm h-100">
                 <h4 class="fw-bold mb-4"><i class="fas fa-paper-plane text-primary me-2"></i> Quick Financing Request</h4>
-                <form id="finance-form" action="" method="post">
-                    <div class="mb-3">
-                        <label class="form-label">Car Interested In</label>
-                        <select class="form-select" name="car" id="car">
-                            {% for car in cars %}
-                            <option value="{{ car.brand_name }} {{ car.model }}">
-                                {{ car.brand_name }} {{ car.model }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Name</label>
-                        <input type="text" class="form-control" name="name" id="name" placeholder="e.g. Ahmad Al-Hassan" value="{{ form.name.value|default_if_none:'' }}">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Phone Number</label>
-                        <input type="text" name="mobile_phone" id="mobile_phone" class="form-control" placeholder="+963 9 1234 5678" value="{{ mobile_phone }}">
-                    </div>
-                    <div class="mb-4">
-                        <label class="form-label">Payment Method</label>
-                        <select class="form-select" name="payment_method" id="payment_method">
-                            <option value="Cash">Cash</option>
-                            <option value="Bank-financing">Bank Financing</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="form-label">Preferred Language</label>
-                        <select class="form-select" name="language" id="language">
-                            <option value="Arabic">Arabic</option>
-                            <option value="English">English</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn w-100 rounded-pill" style="background-color: orange; color:white;">Send via WhatsApp</button>
-                </form>
+                    <form id="finance-form" action="{% url 'frontend:send_f_request_data' %}" method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Car Interested In</label>
+                            <select class="form-select" name="car" id="car">
+                                    {% for car in cars %}
+                                    <option value="{{ car.carModel.manufacturer.name }} {{ car.carModel.name }}">
+                                        {{ car.carModel.manufacturer.name }} {{ car.carModel.name }}
+                                    </option>
+                                    {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                                <label class="form-label">Name</label>
+                                <input type="text" class="form-control" name="name" id="name" placeholder="e.g. John Doe" value="{{ form.name.value|default_if_none:'' }}">
+                        </div>
+                        <div class="mb-3">
+                                <label class="form-label">Phone Number</label>
+                                <input type="text" name="mobile_phone" id="mobile_phone" class="form-control" placeholder="+971 50 123 4567" value="{{ mobile_phone }}">
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Payment Mehtod</label>
+                            <select class="form-select" name="payment_method" id="payment_method">
+                                <option value="Cash">Cash</option>
+                                <option value="Bank-financing">Bank financing</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Preferred Language</label>
+                            <select class="form-select" name="language" id="language">
+                                <option value="Arabic">Arabic</option>
+                                <option value="English">English</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn w-100 rounded-pill" style="color: white; background:orange;">Send throw whatsapp</button>
+                    </form>
             </div>
         </div>
     </div>
@@ -242,6 +272,67 @@
     <!-- Back to Top -->
     <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="fa fa-angle-double-up"></i></a>
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // CSRF token helper 
+        function getCSRFToken() {
+            let cookieValue = null;
+            const name = 'csrftoken';
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    cookie = cookie.trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    
+        // Function to update salary overview dynamically
+        function updateSalaryOverview(action) {
+            const car_price = $('#car_price').val();
+            const downpayment = $('#downpayment').val();
+            const  loan_duration = $('#loan_duration').val();
+
+            if (!car_price || !downpayment || !loan_duration) {
+                // Ensure that we don't make a request with incomplete data
+                return;
+            }
+
+            $.ajax({
+                url: "{% url 'frontend:financing' %}",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    car_price: car_price,
+                    downpayment: downpayment,
+                    loan_duration: loan_duration,
+                    action: action
+                }),
+                headers: {
+                    'X-CSRFToken': getCSRFToken()
+                },
+                success: function (response) {
+                    // Update the DOM with the results
+                    $('#estimated_monthly_payment').val(response.estimated_monthly_payment || "AED 0.00");
+                },
+                error: function (error) {
+                    console.error("Error:", error.responseJSON || error.responseText);
+                    alert("An error occurred. Please try again.");
+                }
+            });
+        }
+
+        // Event listener for input changes
+        $('#car_price, #downpayment, #loan_duration').on('input', function () {
+            // Optionally, you can set the action based on which field changed or use a default action.
+            updateSalaryOverview();
+        });
+    </script>
 
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>

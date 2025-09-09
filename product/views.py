@@ -227,7 +227,7 @@ def product(request: Request | HttpRequest, id: UUID = None):
                 return Response(
                      data={"message": "this Product does not exist"},
                      status=status.HTTP_404_NOT_FOUND)
-            
+'''
 @api_view(['GET'])
 def filterApi(request:HttpRequest|Request)->Response:
      query= Product.objects.filter(
@@ -238,5 +238,31 @@ def filterApi(request:HttpRequest|Request)->Response:
 
 
      return Response(serializer.data)
+'''
 
+@api_view(['GET'])
+def filterApi(request: HttpRequest | Request) -> Response:
+    queryset = Product.objects.filter(is_deleted=False, is_sold=False)
 
+    manufacturer_id = request.GET.get('manufacturer')
+    model_id = request.GET.get('model')
+    color_id = request.GET.get('color')
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
+    is_new = request.GET.get('is_new')
+
+    if manufacturer_id:
+        queryset = queryset.filter(carModel__manufacturer__id=manufacturer_id)
+    if model_id:
+        queryset = queryset.filter(carModel__id=model_id)
+    if color_id:
+        queryset = queryset.filter(color__id=color_id)
+    if min_price:
+        queryset = queryset.filter(price__gte=min_price)
+    if max_price:
+        queryset = queryset.filter(price__lte=max_price)
+    if is_new in ['true', 'false']:
+        queryset = queryset.filter(is_new=(is_new == 'true'))
+
+    serializer = ProductSerializer(queryset.order_by('-price'), many=True)
+    return Response(serializer.data)

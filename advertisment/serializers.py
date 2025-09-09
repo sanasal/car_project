@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from .models import advertisment
+from .models import Advertisment
 
 class advertismentSerializer(serializers.ModelSerializer):
     class Meta:
-        model= advertisment
+        model= Advertisment
         fields='__all__'

@@ -8,8 +8,8 @@
     <meta charset="utf-8">
     <title>Auto Sham Cars</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="Free HTML Templates" name="keywords">
-    <meta content="Free HTML Templates" name="description">
+    <meta content="Auto Sham Cars" name="keywords">
+    <meta content="Auto Sham Cars" name="description">
 
     <!-- Auto Sham Cars Logo -->
     <link rel="preload" type="image/png" href="{% static 'img/auto_sham_logo.png'%}">
@@ -33,6 +33,86 @@
 
     <!-- Template Stylesheet -->
     <link href="{% static 'css/style.css'%}" rel="stylesheet">
+
+    <style>
+        /* ===== Modal Background ===== */
+    .reg-modal-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    /* ===== Modal Box ===== */
+    .reg-modal {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.2);
+      transform: translateY(-40px);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+    .reg-modal.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .reg-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #030136;
+    }
+
+    .reg-field {
+      margin-bottom: 1.2rem;
+    }
+    .reg-label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      color: #333;
+    }
+    .reg-input {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      border-radius: 12px;
+      border: 1px solid #ddd;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    .reg-input:focus {
+      border-color: #ff5e62;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(255, 94, 98, 0.2);
+    }
+
+    .reg-btn {
+      width: 100%;
+      background: rgb(0, 0, 74);
+      color: #fff;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .reg-btn:hover {
+      background: orange;
+      transform: translateY(-2px);
+    }
+
+    </style>
 </head>
 
 <body>
@@ -107,6 +187,18 @@
 
             <li class="nav-item"><a href="{% url 'frontend:contact'%}" class="nav-link"><i class="fa fa-envelope mr-2"></i>Contact</a></li>
             </ul>
+            {% if user.is_authenticated %}
+            <form action="/log_out/" method="post" class="d-flex align-items-center">
+                {% csrf_token %}
+                <div class="col-xl-2 col-lg-4 col-md-6 px-2"></div>
+                <button type="submit" class="btn btn-primary py-md-2 px-md-4 mt-2">LogOut</button>
+            </form>
+            {% else %}
+            <div class="col-xl-2 col-lg-4 col-md-6 px-2">
+                <a href="{% url 'frontend:sign_in' %}" class="btn btn-primary py-md-2 px-md-5 mt-2">Sign in</a>
+            </div>
+            {% endif %}
+
         </div>
 
         </nav>
@@ -116,49 +208,53 @@
 
 
     <!-- Search Start -->
-    <div class="container-fluid bg-white pt-3 px-lg-3">
-        <div class="row mx-n2">
-            <div class="col-xl-2 col-lg-4 col-md-6 px-2">
-                <select class="custom-select px-4 mb-3" style="height: 50px;">
-                    <option selected>Brand</option>
-                    <option value="1">Location 1</option>
-                    <option value="2">Location 2</option>
-                    <option value="3">Location 3</option>
-                </select>
-            </div>
-            <div class="col-xl-2 col-lg-4 col-md-6 px-2">
-                <select class="custom-select px-4 mb-3" style="height: 50px;">
-                    <option selected>Year</option>
-                    <option value="1">Location 1</option>
-                    <option value="2">Location 2</option>
-                    <option value="3">Location 3</option>
-                </select>
-            </div>
-            <div class="col-xl-2 col-lg-4 col-md-6 px-2">
-                <div class="date mb-3" id="date" data-target-input="nearest">
-                    <input type="text" class="form-control p-4" placeholder="Price"
-                        data-target="#date"/>
-                </div>
-            </div>
-            <div class="col-xl-2 col-lg-4 col-md-6 px-2">
-                <div class="time mb-3" id="time" data-target-input="nearest">
-                    <input type="text" class="form-control p-4" placeholder="Model"
-                        data-target="#time"/>
-                </div>
-            </div>
-            <div class="col-xl-2 col-lg-4 col-md-6 px-2">
-                <select class="custom-select px-4 mb-3" style="height: 50px;">
-                    <option selected>Body Style</option>
-                    <option value="1">Car 1</option>
-                    <option value="2">Car 1</option>
-                    <option value="3">Car 1</option>
-                </select>
-            </div>
-            <div class="col-xl-2 col-lg-4 col-md-6 px-2">
-                <button class="btn btn-primary btn-block mb-3" type="submit" style="height: 50px;">Search</button>
-            </div>
+    <form action="{% url 'frontend:cars-filter' %}" method="get" class="row mx-3 mt-2">
+
+        <!-- Manufacturer -->
+        <div class="col-xl-2 col-lg-4 col-md-6 px-2" style="margin-left: 120px;">
+            <select name="manufacturer" class="custom-select px-4 mb-3" style="height: 50px;">
+                <option value="">Brands</option>
+                {% for m in manufacturers %}
+                    <option value="{{ m.id }}">{{ m.name }}</option>
+                {% endfor %}
+            </select>
         </div>
-    </div>
+
+        <!-- Manufacturer Location -->
+        <div class="col-xl-2 col-lg-4 col-md-6 px-2">
+            <select name="manufacturer" class="custom-select px-4 mb-3" style="height: 50px;">
+                <option value="">Brand Location</option>
+                {% for m in manufacturers %}
+                    <option value="{{ m.id }}">{{ m.location }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Model -->
+                <div class="col-xl-2 col-lg-4 col-md-6 px-2">
+            <select name="model" class="custom-select px-4 mb-3" style="height: 50px;">
+                <option value="">All Models</option>
+                {% for m in models %}
+                    <option value="{{ m.id }}">{{ m.name }}</option>
+                {% endfor %}
+                    </select>
+                </div>
+
+        <!-- Color -->
+                <div class="col-xl-2 col-lg-4 col-md-6 px-2">
+            <select name="color" class="custom-select px-4 mb-3" style="height: 50px;">
+                <option value="">All Colors</option>
+                {% for c in colors %}
+                    <option value="{{ c.id }}">{{ c.name }}</option>
+                {% endfor %}
+                    </select>
+                </div>
+
+        <!-- Search -->
+        <div class="col-xl-2 col-lg-4 col-md-6 px-2">
+            <button type="submit" class="btn btn-primary btn-block mb-3" style="height: 50px;">Search</button>
+        </div>
+    </form>
     <!-- Search End -->
 
 
@@ -184,7 +280,7 @@
                         <div class="p-3" style="max-width: 900px;">
                             <h4 class="text-white text-uppercase mb-md-3">Car Financing</h4>
                             <h1 class="display-1 text-white mb-md-4">Flexible Financing Options for Every Buyer</h1>
-                            <a class="btn btn-primary py-md-3 px-md-5 mt-2" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Apply Now</a>
+                            <a class="btn btn-primary py-md-3 px-md-5 mt-2">Apply Now</a>
                         </div>
                     </div>
                 </div>
@@ -202,26 +298,6 @@
         </div>
     </div>
     <!-- Carousel End -->
-
-    <!-- Modal -->
-    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-        <div class="modal-header">
-            <h1 class="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-            ...
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Understood</button>
-        </div>
-        </div>
-    </div>
-    </div>
-
 
     <!-- About Start -->
     <div class="container-fluid py-5">
@@ -246,13 +322,14 @@
             <h1 class="display-1 text-primary text-center">02</h1>
             <h2 class="display-4 text-center mt-3 mb-5">Cars Inventory</h2>
             <div class="owl-carousel related-carousel position-relative" style="padding: 0 30px;">
-                <div class="rent-item">
-                    <img class="img-fluid mb-4" src="{% static 'img/car-rent-1.png'%}" alt="">
-                    <h4 class="text-uppercase mb-4">Mercedes Benz R3</h4>
+                {% for car in cars %}
+                <div class="rent-item" style="padding: 0%;">
+                    <img class="img-fluid mb-4" src="{{ car.product.img.url }}" alt="" width="100%" height="100%">
+                    <h4 class="text-uppercase mb-4"></h4>
                     <div class="d-flex justify-content-center mb-4">
-                        <div class="px-2">
+                        <div class="px-0">
                             <i class="fa fa-car text-primary mr-1"></i>
-                            <span>2015</span>
+                            <span>{{ car.product.carModel.model_date }}</span>
                         </div>
                         <div class="px-2 border-left border-right">
                             <i class="fa fa-cogs text-primary mr-1"></i>
@@ -260,68 +337,12 @@
                         </div>
                         <div class="px-2">
                             <i class="fa fa-road text-primary mr-1"></i>
-                            <span>25K</span>
+                            <span>{{car.product.current_kilometer }}</span>
                         </div>
                     </div>
-                    <a class="btn btn-primary px-3" href="{% url 'frontend:car_details'%}">Car Details</a>
+                    <a class="btn btn-primary px-3 mb-5" href="{% url 'frontend:car_details' car_id=car.product.id %}">Car Details</a>
                 </div>
-                <div class="rent-item">
-                    <img class="img-fluid mb-4" src="{% static 'img/car-rent-2.png'%}" alt="">
-                    <h4 class="text-uppercase mb-4">Mercedes Benz R3</h4>
-                    <div class="d-flex justify-content-center mb-4">
-                        <div class="px-2">
-                            <i class="fa fa-car text-primary mr-1"></i>
-                            <span>2015</span>
-                        </div>
-                        <div class="px-2 border-left border-right">
-                            <i class="fa fa-cogs text-primary mr-1"></i>
-                            <span>AUTO</span>
-                        </div>
-                        <div class="px-2">
-                            <i class="fa fa-road text-primary mr-1"></i>
-                            <span>25K</span>
-                        </div>
-                    </div>
-                    <a class="btn btn-primary px-3" href="{% url 'frontend:car_details'%}">Car Details</a>
-                </div>
-                <div class="rent-item">
-                    <img class="img-fluid mb-4" src="{% static 'img/car-rent-3.png'%}" alt="">
-                    <h4 class="text-uppercase mb-4">Mercedes Benz R3</h4>
-                    <div class="d-flex justify-content-center mb-4">
-                        <div class="px-2">
-                            <i class="fa fa-car text-primary mr-1"></i>
-                            <span>2015</span>
-                        </div>
-                        <div class="px-2 border-left border-right">
-                            <i class="fa fa-cogs text-primary mr-1"></i>
-                            <span>AUTO</span>
-                        </div>
-                        <div class="px-2">
-                            <i class="fa fa-road text-primary mr-1"></i>
-                            <span>25K</span>
-                        </div>
-                    </div>
-                    <a class="btn btn-primary px-3" href="{% url 'frontend:car_details'%}">Car Details</a>
-                </div>
-                <div class="rent-item">
-                    <img class="img-fluid mb-4" src="{% static 'img/car-rent-4.png'%}" alt="">
-                    <h4 class="text-uppercase mb-4">Mercedes Benz R3</h4>
-                    <div class="d-flex justify-content-center mb-4">
-                        <div class="px-2">
-                            <i class="fa fa-car text-primary mr-1"></i>
-                            <span>2015</span>
-                        </div>
-                        <div class="px-2 border-left border-right">
-                            <i class="fa fa-cogs text-primary mr-1"></i>
-                            <span>AUTO</span>
-                        </div>
-                        <div class="px-2">
-                            <i class="fa fa-road text-primary mr-1"></i>
-                            <span>25K</span>
-                        </div>
-                    </div>
-                    <a class="btn btn-primary px-3" href="{% url 'frontend:car_details'%}">Car Details</a>
-                </div>
+                {% endfor %}
             </div>
         </div>
     </div>
@@ -424,7 +445,7 @@
                 <div class="py-5">
                     <h1 class="display-1 text-uppercase text-primary mb-4">10% OFF</h1>
                     <h1 class="text-uppercase text-light mb-4">Special Offer For New Members</h1>
-                    <a class="btn btn-primary mt-2 py-3 px-5" href="">Register Now</a>
+                    <a class="btn btn-primary mt-2 py-3 px-5" href="{% url 'frontend:sign_in'%}">Register Now</a>
                 </div>
             </div>
         </div>

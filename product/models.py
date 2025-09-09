@@ -1,5 +1,8 @@
 import uuid
 from django.db import models
+import os
+import zipfile
+from django.core.files.base import ContentFile
 class Manufacturer(models.Model):
     id = models.UUIDField(
         primary_key=True,
@@ -32,17 +35,12 @@ class CarModel(models.Model):
         related_query_name= 'carmodel'
   )
     name = models.CharField(max_length=255)
-    model_date = models.DateField()
+    model_date = models.PositiveIntegerField(null=True)
     created_at=models.DateTimeField(
         auto_now_add=True
         )
     specs = models.TextField(
         blank=True
-    )
-    img=models.ImageField(
-        null=True,
-        upload_to='imgs/carModel',
-        max_length=500
     )
     updated_at=models.DateTimeField(
         auto_now=True
@@ -65,15 +63,15 @@ class Color(models.Model):
     created_at=models.DateTimeField(
         auto_now_add=True
         )
-    red_value=models.IntegerField(default=0)
-    green_value=models.IntegerField(default=0)
-    blue_value=models.IntegerField(default=0)
     updated_at=models.DateTimeField(
         auto_now=True
      )
     is_deleted=models.BooleanField(
         default=False
         )
+    
+    def __str__(self):
+        return self.name
     class Meta:
         db_table = 'color'
         verbose_name = 'color'
@@ -127,3 +125,44 @@ class Product(models.Model):
         db_table = 'product'
         verbose_name = 'product'
         verbose_name_plural = 'products'        
+
+
+class CarImage(models.Model):
+    car = models.ForeignKey(Product, related_name="images", on_delete=models.CASCADE)
+    image = models.ImageField(upload_to="car_images/" , null=True)
+
+    def __str__(self):
+        return f"{self.car.carModel.manufacturer.name} {self.car.carModel.name}"
+
+
+class CarImageZip(models.Model):
+    car = models.ForeignKey(Product, on_delete=models.CASCADE , related_name="zip_files")
+    zip_file = models.FileField(upload_to="car_zips/" , null=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # أول شي نخزن الملف
+        self.extract_images()
+
+    def extract_images(self):
+        if not self.zip_file:
+            return
+
+        zip_path = self.zip_file.path
+        if not os.path.exists(zip_path):
+            print(f"ZIP file does NOT exist: {zip_path}")
+            return
+
+        with zipfile.ZipFile(zip_path, "r") as zip_ref:
+            for filename in zip_ref.namelist():
+                if filename.endswith((".jpg", ".jpeg", ".png")):
+                    # تنظيف الاسم من المجلدات (بعض الـ ZIP بيكون فيه مسارات مثل folder/image.png)
+                    clean_name = os.path.basename(filename)
+                    if not clean_name:  # إذا كان اسم فارغ (مجلد) نطنش
+                        continue
+
+                    img_data = zip_ref.read(filename)
+
+                    new_image = CarImage(car=self.car)
+                    new_image.image.save(clean_name, ContentFile(img_data), save=True)
+                    print(f"✅ Extracted and saved: {clean_name}") 
+

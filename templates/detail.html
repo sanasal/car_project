@@ -123,24 +123,28 @@
                 <!-- Car Details -->
                 <div class="col-lg-10">
                     <!-- Title -->
-                    <h1 class="display-4 fw-bold text-uppercase mb-4 text-center">Mercedes Benz R3</h1>
+                    <h1 class="display-4 fw-bold text-uppercase mb-4 text-center">{{ car.carModel.manufacturer.name }} {{ car.carModel.name }}</h1>
                     <div class="d-flex justify-content-center mb-4">
-                        <span class="badge text-white fs-6 me-2" style="background-color: orange;">2022</span>
-                        <span class="badge bg-dark text-white fs-6">Luxury</span>
+                        <span class="badge text-white fs-6 me-2" style="background-color: orange;">{{ car.carModel.model_date }}</span>
+                        <span class="badge bg-dark text-white fs-6">{{ car.price }} S.P</span>
                     </div>
 
                     <!-- Carousel -->
                     <div id="carCarousel" class="carousel slide" data-bs-ride="carousel">
                         <div class="carousel-inner">
+                            {% for img in car.images.all %}
+                            {% if img.image %}
+                            {% if forloop.first %}
                             <div class="carousel-item active">
-                                <img src="{% static 'img\WhatsApp Image 2025-04-22 at 2.0 (1).jpg'%}" class="d-block w-100" alt="...">
+                                <img src="{{img.image.url}}" class="d-block w-100" alt="...">
                             </div>
+                            {% else %}
                             <div class="carousel-item">
-                                <img src="{% static 'img\WhatsApp Image 2025-04-22 at 2.03.42 PM (1).jpeg'%}" class="d-block w-100" alt="...">
+                                <img src="{{img.image.url}}" class="d-block w-100" alt="...">
                             </div>
-                            <div class="carousel-item">
-                                <img src="{% static 'img\WhatsApp Image 2025-04-22 at 2.03.44 PM (1).jpeg'%}" class="d-block w-100" alt="...">
-                            </div>
+                            {% endif %}
+                            {% endif %}
+                            {% endfor %}
                         </div>
 
                         <!-- Controls -->
@@ -158,21 +162,13 @@
 
                     </div>
 
-                    <!-- Description -->
-                    <p class="lead text-muted text-center mb-5 mt-5">
-                        Experience unmatched luxury and performance with the Mercedes Benz R3. 
-                        Combining advanced German engineering with timeless elegance, 
-                        this vehicle delivers powerful performance, cutting-edge technology, 
-                        and ultimate comfort for every journey.
-                    </p>
-
                     <!-- Features Grid -->
                     <div class="row g-4 text-center">
                         <div class="col-6 col-md-3">
                             <div class="p-3 border rounded-3 shadow-sm bg-white">
                                 <i class="fa fa-car fs-3 mb-2" style="color:orange;"></i>
                                 <p class="mb-0 fw-semibold">Model</p>
-                                <small class="text-muted">2015</small>
+                                <small class="text-muted">{{car.carModel.model_date}}</small>
                             </div>
                         </div>
                         <div class="col-6 col-md-3">
@@ -186,29 +182,29 @@
                             <div class="p-3 border rounded-3 shadow-sm bg-white">
                                 <i class="fa fa-road fs-3 mb-2" style="color:orange;"></i>
                                 <p class="mb-0 fw-semibold">Mileage</p>
-                                <small class="text-muted">20 km/l</small>
+                                <small class="text-muted">{{car.current_kilometer}}km</small>
                             </div>
                         </div>
                         <div class="col-6 col-md-3">
                             <div class="p-3 border rounded-3 shadow-sm bg-white">
                                 <i class="fa fa-map-marker-alt fs-3 mb-2" style="color:orange;"></i>
-                                <p class="mb-0 fw-semibold">Navigation</p>
-                                <small class="text-muted">GPS Enabled</small>
+                                <p class="mb-0 fw-semibold">Spec</p>
+                                <small class="text-muted">{{car.carModel.specs}}</small>
                             </div>
                         </div>
                         <div class="col-6 col-md-3">
                             <div class="p-3 border rounded-3 shadow-sm bg-white text-center">
                                 <i class="fa fa-palette fs-3 mb-2" style="color:orange;"></i>
                                 <p class="mb-0 fw-semibold">Exterior Color</p>
-                                <small class="text-muted">blue</small>
+                                <small class="text-muted">{{car.color}}</small>
                             </div>
                         </div>
 
                         <div class="col-6 col-md-3">
                             <div class="p-3 border rounded-3 shadow-sm bg-white text-center">
                                 <i class="fa fa-couch fs-3 mb-2" style="color:orange;"></i>
-                                <p class="mb-0 fw-semibold">Interior Color</p>
-                                <small class="text-muted">black</small>
+                                <p class="mb-0 fw-semibold">Manufacture Location</p>
+                                <small class="text-muted">{{car.carModel.manufacturer.location}}</small>
                             </div>
                         </div>
 
@@ -216,17 +212,26 @@
                             <div class="p-3 border rounded-3 shadow-sm bg-white text-center">
                                 <i class="fa fa-cogs fs-3 mb-2" style="color:orange;"></i>
                                 <p class="mb-0 fw-semibold">Engine Capacity</p>
-                                <small class="text-muted">2000</small>
+                                <small class="text-muted">{{car.engine}}</small>
                             </div>
                             </div>
 
                         <div class="col-6 col-md-3">
                             <div class="p-3 border rounded-3 shadow-sm bg-white text-center">
-                                <i class="fa fa-bolt fs-3 mb-2" style="color:orange;"></i>
-                                <p class="mb-0 fw-semibold">Horsepower</p>
-                                <small class="text-muted">300</small>
+                                <i class="fa fa-money-bill fs-3 mb-2" style="color:orange;"></i>
+                                <p class="mb-0 fw-semibold">Price</p>
+                                <small class="text-muted">{{car.price}} S.P</small>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Description -->
+                    <p class="lead text-muted text-center mb-5 mt-5">
+                       {{car.features}}
+                    </p>
+
+                    <div class="col-xl-2 col-lg-4 col-md-6 px-2">
+                        <a href="{% url 'frontend:financing'%}" class="btn btn-primary btn-block pt-3" style="height: 50px;">Financing</a>
                     </div>
                 </div>
             </div>

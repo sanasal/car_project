@@ -19,11 +19,6 @@ class Advertisment(models.Model):
         default=False
         )
     product=models.ForeignKey(Product, on_delete=models.CASCADE)
-    img=models.ImageField(
-        max_length=500,
-        null= True,
-        default= None
-        )
     class Meta:
         db_table = 'advertisment'
         verbose_name = 'advertisment'
