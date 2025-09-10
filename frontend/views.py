@@ -41,24 +41,23 @@ def cars_filter_view(request):
     cars = Product.objects.filter(is_deleted=False, is_sold=False)
 
     manufacturer_id = request.GET.get('manufacturer')
+    manufacturer_location = request.GET.get('manufacturer_location')
     model_id = request.GET.get('model')
     color_id = request.GET.get('color')
 
-    # Convert string UUID to UUID object before filtering
     try:
         if manufacturer_id:
             cars = cars.filter(carModel__manufacturer__id=UUID(manufacturer_id))
+        if manufacturer_location:
+            cars = cars.filter(carModel__manufacturer__location__iexact=manufacturer_location)
         if model_id:
             cars = cars.filter(carModel__id=UUID(model_id))
         if color_id:
             cars = cars.filter(color__id=UUID(color_id))
     except:
-        pass  # ignore invalid UUIDs
+        pass
 
-    context = {
-        'cars': cars
-    }
-    return render(request, 'cars_filter.html', context)
+    return render(request, 'cars_filter.html', {'cars': cars})
 
 
 def contact_us(request):
